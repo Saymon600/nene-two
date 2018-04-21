@@ -1,0 +1,23 @@
+{
+  "name": "nene-two",
+  "version": "0.0.1",
+  "description": "Nene Mk-II, another dark anitwitter discord bot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": " https://github.com/Saymon600/nene-two.git"
+  },
+  "author": "Saymon",
+  "license": "ISC",
+  "engines": {
+    "node": "8.7.0"
+  },
+  "dependencies": {
+    "eris": "0.8.5",
+    "fs": "0.0.1-security",
+    "node-opus": "0.2.7"
+  }
+}
