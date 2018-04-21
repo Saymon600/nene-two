@@ -1,3 +1,3 @@
-Object.freeze({
+module.exports = Object.freeze({
 	TOKEN: ""
 });
