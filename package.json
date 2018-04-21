@@ -18,6 +18,8 @@
   "dependencies": {
     "eris": "0.8.5",
     "fs": "0.0.1-security",
-    "node-opus": "0.2.7"
+    "moment": "2.22.1",
+    "node-opus": "0.2.7",
+    "request": "2.85.0"
   }
 }

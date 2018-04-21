@@ -1,6 +1,17 @@
 const Eris = require("eris");
 const fs = require("fs");
-const env = require("./config")
+const moment = require("moment");
+const request = require("request");
+const env = require("./config");
+const audio = require("./default-audio");
+
+var custom = false;
+var lp = [];
+var queue = [];
+var np = "";
+var game = {
+	name: ""
+}
 
 var bot = new Eris(env.TOKEN);
 
@@ -33,6 +44,33 @@ bot.on("messageCreate", (msg) => {
 	    	}
 	    }
 
+	    if(msg.content == "!np"){
+			bot.createMessage(msg.channel.id,"I'm currently playing " + game.name);
+		}
+
+		if(msg.content == "!dj"){
+			bot.createMessage(msg.channel.id,"The current dj is  " + dj);
+		}
+
+		if(msg.content == "!lp"){
+			var message = '```Last played (r/a/dio):\n';
+			for(var a = 0; a < lp.length; a++){
+				message = message + "" + lp[a].name + ', ' + lp[a].time + "\n";
+			}
+			message = message + "```"
+			bot.createMessage(msg.channel.id,message);
+		}
+
+		if(msg.content == "!rqueue"){
+			var message = "```In queue (r/a/dio):\n";
+			for(var a = 0; a < queue.length; a++){
+				message = message + "" + queue[a].name + ' ' + queue[a].time + "\n";
+			}
+			message = message + "```"
+			bot.createMessage(msg.channel.id,message);
+		}
+
+
 	    //Connect to the Voice Channel and plays r/a/dio
 	    if(msg.content.startsWith("!connect")){
 	    	if(!msg.channel.guild) { 
@@ -52,8 +90,8 @@ bot.on("messageCreate", (msg) => {
 	            if(connection.playing){ 
 	                connection.stopPlaying();
 	            }
-	            connection.play("music/masterpiece.mp3"); 
-	            bot.createMessage(msg.channel.id, "Now playing: M@sterpiece");
+	            connection.play(audio.link); 
+	            bot.createMessage(msg.channel.id, "Now playing: " + audio.name);
 	            connection.once("end", () => {
 	                bot.createMessage(msg.channel.id, "Finished.");
 	            });
@@ -65,3 +103,35 @@ bot.on("messageCreate", (msg) => {
 });
 
 bot.connect(); 
+
+//Feeding info from r/a/dio API
+setInterval(function(){
+	request('http://r-a-d.io/api', function (error,response,body) {
+		if(!error && response.statusCode == 200) {
+			let radioJson = JSON.parse(String(body));
+			let musicname = unescape(radioJson.main.np);
+			dj = radioJson.main.dj.djname;
+
+			game.name = musicname;
+			np = musicname;
+
+			for(var a = 0; a < 5; a++){
+				var temp = {name: '', time: ''};
+				var qtemp = {name: '', time: ''};
+				temp.name = radioJson.main.lp[a].meta;
+				temp.time = moment().diff(moment(parseInt(radioJson.main.lp[a].timestamp)*1000),'minutes') + " minutes ago";
+				qtemp.name = radioJson.main.queue[a].meta;
+				qtemp.time = "in " + moment(parseInt(radioJson.main.queue[a].timestamp)*1000).diff(moment(),'minutes') + " minutes";
+				lp[a] = temp;
+				queue[a] = qtemp;
+			}
+			if(!custom){
+				bot.editStatus("",{
+					name: musicname
+				});
+			}			
+		}else{
+			console.log(moment().format("LLL"),error);
+		}
+	});
+},5000);
