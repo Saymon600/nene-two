@@ -8,11 +8,23 @@ bot.on("ready", () => {
 });
 
 bot.on("messageCreate", (msg) => {
+	//I guess, a Nene não precisa de uma estrutura robusta (espero)
 	if(msg.channel.id === env.GAMEBOARD_CHANNEL || msg.author.id === env.SAYMON_USER){
-		if(msg.content === "!ping") { 
+
+		//Ping 
+		if(msg.content.startsWith("!ping")){ 
 	        bot.createMessage(msg.channel.id, "Pong!");
-	    } else if(msg.content === "!pong") { 
-	        bot.createMessage(msg.channel.id, "Ping!");
+	    }
+
+	    if(msg.content.startsWith("!nn")){
+	    	var nick = msg.content.split(" ").slice(1).join(" ");
+	    	bot.editNickname(msg.channel.guild.id,nick);
+	    	var status = msg.content.split(" ").slice(1).join(" ");
+	    	if(msg.author.id === env.SAYMON_USER || msg.author.id === env.AUGUSTOP_USER){
+	        	bot.createMessage(msg.channel.id, "殺すぞーぉ！");
+	    	}else{
+	    		bot.createMessage(msg.channel.id, "",{file:fs.readFileSync(__dirname + "/images/thinking.png"),name:"thinking.png"});
+	    	}
 	    }
 	}
 });
