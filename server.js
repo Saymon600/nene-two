@@ -96,7 +96,7 @@ bot.on("messageCreate", (msg) => {
 		}
 
 		if(msg.content == "!nhelp"){
-			message = "Command List:\n";
+			message = "```Command List:\n";
 			message += "!play (+ direct mp3 link[pomf and stuff] or YouTube link): I'1ll play it for you or queue it.\n";
 			message += "!queue: shows custom queue list or r/a/dio's one.\n";
 			message += "!connect: connect to r/a/dio\n";
@@ -107,6 +107,9 @@ bot.on("messageCreate", (msg) => {
 			message += "!dj: show who's playing in r/a/dio right now\n";
 			message += "!lp: shows last played songs in r/a/dio\n";
 			message += "!rqueue: show r/a/dio queue list\n";
+
+			message+= "```"
+			bot.createMessage(msg.channel.id,message);
 		}
 
 
