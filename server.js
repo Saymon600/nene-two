@@ -5,7 +5,12 @@ const request = require("request");
 const env = require("./config");
 const audio = require("./default-audio");
 
+//Custom controls
 var custom = false;
+var playing = false;
+var cqueue = [];
+
+//R/a/dio objs
 var lp = [];
 var queue = [];
 var np = "";
@@ -83,19 +88,50 @@ bot.on("messageCreate", (msg) => {
 			}
 
 			//Connecting
-			bot.joinVoiceChannel(msg.member.voiceState.channelID).catch((err) => { 
-	            bot.createMessage(msg.channel.id, "Error joining voice channel: " + err.message); 
-	            console.log(err); 
-			}).then((connection) => {
-	            if(connection.playing){ 
-	                connection.stopPlaying();
-	            }
-	            connection.play(audio.link); 
-	            bot.createMessage(msg.channel.id, "Now playing: " + audio.name);
-	            connection.once("end", () => {
-	                bot.createMessage(msg.channel.id, "Finished.");
-	            });
-			});
+			playAudio(audio.link,audio.name,msg.member.voiceState.channelID,msg);
+	    }
+
+	    //Connect to the Voice Channel and plays custom source
+	    if(msg.content.startsWith("!play")){
+	    	if(!msg.channel.guild) { 
+	    		bot.createMessage(msg.channel.id, "You need to be in a server to run this command.",{file:fs.readFileSync(__dirname + "/images/thinking.png"),name:"thinking.png"});
+	    		return;
+			}
+			if(!msg.member.voiceState.channelID) { 
+	            bot.createMessage(msg.channel.id, "You need to be in a voice channel to run this command.",{file:fs.readFileSync(__dirname + "/images/thinking.png"),name:"thinking.png"});
+	            return;
+			}
+
+			//Pre-processing
+			var music = msg.content.split(" ").slice(1).join(" ");
+			
+			//mp3
+			if(music.startsWith("http") && music.endsWith(".mp3")){
+				let split = music.split("/");
+				let tempName = split[split.length-1];
+
+				var r = request(music);
+				r.on("response",function(res){
+					res.pipe(fs.createWriteStream("music/" + tempName));
+					if(playing && custom){
+						let newAudio = initCustom();
+						newAudio.name = tempName;
+						newAudio.link = "music/" + tempName;
+						newAudio.channel = msg.member.voiceState.channelID;
+						cqueue.push(newAudio);
+						bot.createMessage(msg.channel.id,tempName + " queued.");
+					}else{
+						custom = true;
+						playAudio("music/" + tempName,tempName,msg.member.voiceState.channelID,msg);
+					}
+				});
+			}else{
+				bot.createMessage(msg.channel.id,"Probably it's an invalid link. Please check and try again.");
+				return;
+			}
+
+			//Connecting
+			//playAudio(audio.link,audio.name,msg.member.voiceState.channelID,msg);
 	    }
 
 
@@ -112,8 +148,14 @@ setInterval(function(){
 			let musicname = unescape(radioJson.main.np);
 			dj = radioJson.main.dj.djname;
 
-			game.name = musicname;
-			np = musicname;
+			if(!custom){
+				game.name = musicname;
+				np = musicname;
+				bot.editStatus("",{
+					name: musicname
+				});
+			}
+			
 
 			for(var a = 0; a < 5; a++){
 				var temp = {name: '', time: ''};
@@ -124,14 +166,50 @@ setInterval(function(){
 				qtemp.time = "in " + moment(parseInt(radioJson.main.queue[a].timestamp)*1000).diff(moment(),'minutes') + " minutes";
 				lp[a] = temp;
 				queue[a] = qtemp;
-			}
-			if(!custom){
-				bot.editStatus("",{
-					name: musicname
-				});
-			}			
+			}		
 		}else{
 			console.log(moment().format("LLL"),error);
 		}
 	});
 },5000);
+
+var initCustom = function(){
+	return {
+		link: "",
+		name: "",
+		channel: ""
+	};
+}
+
+var playAudio = function(link,name,channel,msg){
+	console.log("Playing: " + name);
+	bot.joinVoiceChannel(channel).catch((err) => { 
+        bot.createMessage(msg.channel.id, "Error joining voice channel: " + err.message); 
+        console.log(err); 
+	}).then((connection) => {
+        if(connection.playing && custom){ 
+            connection.stopPlaying();
+        }
+        playing = true;
+        connection.play(link);
+        bot.createMessage(msg.channel.id, "Now playing: " + name);
+        bot.editStatus("",{
+			name: name
+		});
+        connection.once("end", () => {
+        	playing = false;
+        	if(cqueue.length > 0){
+        		custom = true;
+        		let next = cqueue[0];
+        		cqueue.splice(0,1);
+        		playAudio(next.link,next.name,next.channel,msg);
+        	}else{
+        		custom = false;
+        		bot.createMessage(msg.channel.id, "Finished.");
+        		playAudio(audio.link,audio.name,channel,msg);
+        	}
+            
+        });
+	});
+}
+
