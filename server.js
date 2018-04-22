@@ -2,6 +2,9 @@ const Eris = require("eris");
 const fs = require("fs");
 const moment = require("moment");
 const request = require("request");
+const ytdl = require("ytdl-core");
+
+
 const env = require("./config");
 const audio = require("./default-audio");
 
@@ -54,7 +57,7 @@ bot.on("messageCreate", (msg) => {
 		}
 
 		if(msg.content == "!dj"){
-			bot.createMessage(msg.channel.id,"The current dj is  " + dj);
+			bot.createMessage(msg.channel.id,"The current dj is " + dj);
 		}
 
 		if(msg.content == "!lp"){
@@ -75,6 +78,37 @@ bot.on("messageCreate", (msg) => {
 			bot.createMessage(msg.channel.id,message);
 		}
 
+		if(msg.content == "!queue"){
+			if(custom){
+				var message = "```In queue:\n";
+				for(var a = 0; a < cqueue.length; a++){
+					message = message + "" + cqueue[a].name + ' . Requested by ' + cqueue[a].user + "\n";
+				}
+				message = message + "```"
+			}else{
+				var message = "```In queue (r/a/dio):\n";
+				for(var a = 0; a < queue.length; a++){
+					message = message + "" + queue[a].name + ' ' + queue[a].time + "\n";
+				}
+				message = message + "```"
+			}
+			bot.createMessage(msg.channel.id,message);
+		}
+
+		if(msg.content == "!nhelp"){
+			message = "Command List:\n";
+			message += "!play (+ direct mp3 link[pomf and stuff] or YouTube link): I'1ll play it for you or queue it.\n";
+			message += "!queue: shows custom queue list or r/a/dio's one.\n";
+			message += "!connect: connect to r/a/dio\n";
+			message += "!leave: I'll leave the voice channel if you're with me there.\n";
+			message += "!ping: pon\n";
+			message += "!nn (+ something): changes my nick\n";
+			message += "!np: shows what is playing in r/a/dio right now\n";
+			message += "!dj: show who's playing in r/a/dio right now\n";
+			message += "!lp: shows last played songs in r/a/dio\n";
+			message += "!rqueue: show r/a/dio queue list\n";
+		}
+
 
 	    //Connect to the Voice Channel and plays r/a/dio
 	    if(msg.content.startsWith("!connect")){
@@ -89,6 +123,10 @@ bot.on("messageCreate", (msg) => {
 
 			//Connecting
 			playAudio(audio.link,audio.name,msg.member.voiceState.channelID,msg);
+	    }
+
+	    if(msg.content.startsWith("!leave")){
+	    	bot.leaveVoiceChannel(msg.member.voiceState.channelID);
 	    }
 
 	    //Connect to the Voice Channel and plays custom source
@@ -118,6 +156,7 @@ bot.on("messageCreate", (msg) => {
 						newAudio.name = tempName;
 						newAudio.link = "music/" + tempName;
 						newAudio.channel = msg.member.voiceState.channelID;
+						newAudio.user = msg.author.username;
 						cqueue.push(newAudio);
 						bot.createMessage(msg.channel.id,tempName + " queued.");
 					}else{
@@ -125,13 +164,33 @@ bot.on("messageCreate", (msg) => {
 						playAudio("music/" + tempName,tempName,msg.member.voiceState.channelID,msg);
 					}
 				});
+			}else if(music.indexOf("youtube") > -1){
+				//YouTube
+				ytdl.getInfo(music,(err,info) => {
+					if(err){
+						bot.createMessage(msg.channel.id,"Something went wrong: " + err);
+						return;
+					}
+					let tempName = info.title;
+					let ytid = info.vid;
+					stream = ytdl(music,{filter:"audioonly"});
+					if(playing && custom){
+						let newAudio = initCustom();
+						newAudio.name = tempName;
+						newAudio.link = stream;
+						newAudio.channel = msg.member.voiceState.channelID;
+						newAudio.user = msg.author.username;
+						cqueue.push(newAudio);
+						bot.createMessage(msg.channel.id,tempName + " queued.");
+					}else{
+						custom = true;
+						playAudio(stream,tempName,msg.member.voiceState.channelID,msg);
+					}
+				});
 			}else{
 				bot.createMessage(msg.channel.id,"Probably it's an invalid link. Please check and try again.");
 				return;
 			}
-
-			//Connecting
-			//playAudio(audio.link,audio.name,msg.member.voiceState.channelID,msg);
 	    }
 
 
@@ -177,17 +236,18 @@ var initCustom = function(){
 	return {
 		link: "",
 		name: "",
-		channel: ""
+		channel: "",
+		user: ""
 	};
 }
 
 var playAudio = function(link,name,channel,msg){
 	console.log("Playing: " + name);
 	bot.joinVoiceChannel(channel).catch((err) => { 
-        bot.createMessage(msg.channel.id, "Error joining voice channel: " + err.message); 
+        //bot.createMessage(msg.channel.id, "Error joining voice channel: " + err.message); 
         console.log(err); 
 	}).then((connection) => {
-        if(connection.playing && custom){ 
+        if(connection.playing && !custom){ 
             connection.stopPlaying();
         }
         playing = true;
