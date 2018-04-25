@@ -5,7 +5,7 @@ const request = require("request");
 const ytdl = require("ytdl-core");
 
 
-const env = require("./config");
+const constants = require("./discordConstants");
 const audio = require("./default-audio");
 
 //Custom controls
@@ -29,7 +29,7 @@ bot.on("ready", () => {
 
 bot.on("messageCreate", (msg) => {
 	//I guess, a Nene não precisa de uma estrutura robusta (espero)
-	if(msg.channel.id === env.GAMEBOARD_CHANNEL || msg.author.id === env.SAYMON_USER){
+	if(msg.channel.id === constants.GAMEBOARD_CHANNEL || msg.author.id === constants.SAYMON_USER){
 
 		//Ping 
 		if(msg.content.startsWith("!ping")){ 
@@ -45,7 +45,7 @@ bot.on("messageCreate", (msg) => {
 	    	var nick = msg.content.split(" ").slice(1).join(" ");
 	    	bot.editNickname(msg.channel.guild.id,nick);
 	    	var status = msg.content.split(" ").slice(1).join(" ");
-	    	if(msg.author.id === env.SAYMON_USER || msg.author.id === env.AUGUSTOP_USER){
+	    	if(msg.author.id === constants.SAYMON_USER || msg.author.id === constants.AUGUSTOP_USER){
 	        	bot.createMessage(msg.channel.id, "殺すぞーぉ！");
 	    	}else{
 	    		bot.createMessage(msg.channel.id, "",{file:fs.readFileSync(__dirname + "/images/thinking.png"),name:"thinking.png"});

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "eris": "0.8.5",
+    "ffmpeg-binaries": "^3.2.2-3",
     "fs": "0.0.1-security",
     "moment": "2.22.1",
     "node-opus": "0.2.7",
