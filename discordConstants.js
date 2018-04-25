@@ -5,3 +5,4 @@ const constants = {
   CLARION_USER: "363845526711566336"
 };
 
+module.exports = constants;
