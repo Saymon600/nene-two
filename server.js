@@ -1,3 +1,6 @@
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3030;
 const Eris = require("eris");
 const fs = require("fs");
 const moment = require("moment");
@@ -24,6 +27,10 @@ let game = {
 }
 
 const bot = new Eris(process.env.TOKEN);
+
+app.listen(port, () => {
+	console.log(moment().format("LLL") + ': Clarion is running on port ' + port);
+});
 
 bot.connect(); 
 
