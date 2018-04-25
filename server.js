@@ -21,7 +21,7 @@ var game = {
 	name: ""
 }
 
-var bot = new Eris(env.TOKEN);
+var bot = new Eris(process.env.TOKEN);
 
 bot.on("ready", () => { 
     console.log("お兄ちゃん、行くぞ！"); 
