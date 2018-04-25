@@ -26,7 +26,7 @@ let game = {
 	name: ""
 }
 
-// const bot = new Eris(process.env.TOKEN);
+const bot = new Eris(process.env.TOKEN);
 
 app.listen(port, () => {
 	console.log(moment().format("LLL") + ': Clarion is running on port ' + port);
@@ -179,7 +179,7 @@ const joinVoiceChannel = (msg, custom) => {
 	} 
 
 	if(music.indexOf("youtube") > -1){
-		return checkYoutube(msg);
+		return checkYoutube(msg, music);
 	}
 	bot.createMessage(msg.channel.id,"Probably it's an invalid link. Please check and try again.");
 };
@@ -196,15 +196,17 @@ const checkMP3 = (msg) => {
 	});
 };
 
-const checkYoutube = (msg) => {
+const checkYoutube = (msg, music) => {
+	console.log('aa')
 	ytdl.getInfo(music, (err, info) => {
+		console.log('bb')
 		if(err){
 			return bot.createMessage(msg.channel.id,"Something went wrong: " + err);
 		}
 		let tempName = info.title;
 		let ytid = info.vid;
 		stream = ytdl(music, { filter:"audioonly" } );
-		prepareCustom (msg, info.title, steam);
+		prepareCustom (msg, info.title, stream);
 	});
 };
 
@@ -264,7 +266,6 @@ const radioMetaUpdate = setInterval(() => {
 				np = musicName;
 				bot.editStatus("online", {name: musicName});
 			}
-			console.log(musicName);
 		}
 		for(let a = 0; a < 5; a++){
 			const temp = {};
