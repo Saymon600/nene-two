@@ -26,7 +26,7 @@ let game = {
 	name: ""
 }
 
-const bot = new Eris(process.env.TOKEN);
+// const bot = new Eris(process.env.TOKEN);
 
 app.listen(port, () => {
 	console.log(moment().format("LLL") + ': Clarion is running on port ' + port);
@@ -258,10 +258,13 @@ const radioMetaUpdate = setInterval(() => {
 		const musicName = unescape(radioJson.main.np);
 		dj = radioJson.main.dj.djname;
 		if (!custom) {
-			game.name = musicName;
-			np = musicName;
+			if (game.name !== musicName) {
+				game.name = musicName;
+				console.log('Trocou');
+				np = musicName;
+				bot.editStatus("online", {name: musicName});
+			}
 			console.log(musicName);
-			bot.editStatus("online", {name: musicName});
 		}
 		for(let a = 0; a < 5; a++){
 			const temp = {};
