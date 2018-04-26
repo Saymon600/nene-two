@@ -28,6 +28,7 @@ let game = {
 
 const bot = new Eris(process.env.TOKEN);
 
+
 app.listen(port, () => {
 	console.log(moment().format("LLL") + ': Clarion is running on port ' + port);
 });
@@ -165,7 +166,7 @@ const showHelp = (msg) => {
 };
 
 const joinVoiceChannel = (msg, custom) => {
-	if(!(msg.member.voiceState.channelID || msg.channel.guild)) { 
+	if(!msg.member.voiceState.channelID || !msg.channel.guild) { 
 		return sendThinking(msg.channel.id, (!msg.channel.guild) ? "You need to be in a server to run this command." :  "You need to be in a voice channel to run this command.");
 	}
 
@@ -290,7 +291,9 @@ const playAudio = async (link, name, channel, msg) => {
 		playing = true;
 		connection.play(link);
 		bot.createMessage(msg.channel.id, "Now playing: " + name);
-		bot.editStatus("online", {name: name});
+		if (custom) {
+			bot.editStatus("online", {name: name});
+		}
 		connection.once("end", () => { checkConnectionEnd(channel, msg) });
 	} catch (err) {
 		console.log(err);
