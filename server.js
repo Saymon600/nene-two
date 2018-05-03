@@ -30,7 +30,7 @@ const bot = new Eris(process.env.TOKEN);
 
 
 app.listen(port, () => {
-	console.log(moment().format("LLL") + ': Clarion is running on port ' + port);
+	console.log(moment().format("LLL") + ': Nene is running on port ' + port);
 });
 
 bot.connect(); 
@@ -45,7 +45,7 @@ const createCommands = () => {
 	//Ping
 	commands.push({
 		condition: (msg) => { return msg.content.startsWith("!ping") },
-		executeAction: (msg) => { bot.createMessage(msg.channel.id, "Pong!"); },
+		executeAction: (msg) => { bot.createMessage(msg.channel.id, "ポン！"); },
 	});
 
 	//Change Nick
@@ -92,7 +92,7 @@ const createCommands = () => {
 
 	//Show Help
 	commands.push({
-		condition: (msg) => { return msg.content === "!help" },
+		condition: (msg) => { return msg.content === "!nhelp" },
 		executeAction: (msg) => { showHelp(msg) },
 	});
 
@@ -237,6 +237,7 @@ const checkCommand = (command) => {
 bot.on("messageCreate", (msg) => {
 	//I guess, a Nene não precisa de uma estrutura robusta (espero)
 	/////Please. Being autist is fun
+	//:zulul:
 	
 	if (!(msg.channel.id === constants.GAMEBOARD_CHANNEL || msg.author.id === constants.SAYMON_USER || msg.author.id === constants.AUGUSTOP_USER)){
 		return;
@@ -257,13 +258,13 @@ const radioMetaUpdate = setInterval(() => {
 			console.log(moment().format("LLL"),err);
 			return;
 		}
-		const radioJson = JSON.parse(String(body));
-		const musicName = unescape(radioJson.main.np);
+		let radioJson = JSON.parse(String(body));
+		let musicName = unescape(radioJson.main.np);
 		dj = radioJson.main.dj.djname;
 		if (!custom) {
 			if (game.name !== musicName) {
 				game.name = musicName;
-				console.log('Trocou');
+				// console.log('Trocou');
 				np = musicName;
 				bot.editStatus("online", {name: musicName});
 			}
