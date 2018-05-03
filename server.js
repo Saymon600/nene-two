@@ -286,9 +286,11 @@ const playAudio = async (link, name, channel, msg) => {
 	console.log("Playing: " + name);
 	try {
 		const connection = await bot.joinVoiceChannel(channel);
+		console.log("Playing:" + playing);
+		console.log("Custom:" + custom);
 		if (playing && !custom) {
 			console.log("cc");
-			connection.stopPlaying();
+			await connection.stopPlaying();
 		}
 		playing = true;
 		connection.play(link);
