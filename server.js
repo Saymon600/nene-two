@@ -176,7 +176,7 @@ const joinVoiceChannel = (msg, custom) => {
 	const music = msg.content.split(" ").slice(1).join(" ");
 
 	if (music.startsWith("http") && music.endsWith(".mp3")) {
-		return checkMP3(msg);
+		return checkMP3(msg, music);
 	} 
 
 	if(music.indexOf("youtube") > -1){
@@ -185,7 +185,7 @@ const joinVoiceChannel = (msg, custom) => {
 	bot.createMessage(msg.channel.id,"Probably it's an invalid link. Please check and try again.");
 };
 
-const checkMP3 = (msg) => {
+const checkMP3 = (msg, music) => {
 	let split = music.split("/");
 	let tempName = split[split.length-1];
 
@@ -287,6 +287,7 @@ const playAudio = async (link, name, channel, msg) => {
 	try {
 		const connection = await bot.joinVoiceChannel(channel);
 		if (connection.playing && !custom) {
+			console.log("cc");
 			connection.stopPlaying();
 		}
 		playing = true;
