@@ -150,7 +150,7 @@ const showGenericQuery = (msg, feedback, genericQuery) => {
 
 const showHelp = (msg) => {
 	message = "```Command List:\n";
-	message += "!play (+ direct mp3 link[pomf and stuff] or YouTube link): I'1ll play it for you or queue it.\n";
+	message += "!play (+ direct mp3 link[pomf and stuff] or YouTube link): I'll play it for you or queue it.\n";
 	message += "!queue: shows custom queue list or r/a/dio's one.\n";
 	message += "!connect: connect to r/a/dio\n";
 	message += "!leave: I'll leave the voice channel if you're with me there.\n";
@@ -286,7 +286,7 @@ const playAudio = async (link, name, channel, msg) => {
 	console.log("Playing: " + name);
 	try {
 		const connection = await bot.joinVoiceChannel(channel);
-		if (connection.playing && !custom) {
+		if (playing && !custom) {
 			console.log("cc");
 			connection.stopPlaying();
 		}
